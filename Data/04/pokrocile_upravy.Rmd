@@ -1,0 +1,53 @@
+---
+title: "Hlavní nadpis"
+subtitle: "Tohle je podnadpis"
+author:
+  - John Doe^[Institution One, john@example.org]
+  - Jane Doe^[Institution Two, jane@example.org]
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+params:
+  col: "disp"
+---
+
+# Analýza proměnné `r params$col`
+
+# Knihovny
+
+```{r }
+library(dplyr)
+library(ggplot2)
+library(gt)
+```
+
+# Načtení dat {#data-load}
+
+Načtení dat o autech, jsme v [této](#data-load) kapitole.
+
+Tabulka \@ref(tab:mtc)
+
+```{r mtc, echo=FALSE}
+gt(head(mtcars)) |> 
+  tab_caption(
+    caption = "A table of mtcars"
+  )
+```
+
+Tabulka \@ref(tab:mtc)
+
+## Vizualizace
+
+Jednoduchý graf, viz \@ref(fig:muj-grafik).
+
+```{r muj-grafik, fig.cap="Popis obrázku"}
+ggplot(mtcars, aes(x = factor(cyl), y = mpg)) +
+  geom_boxplot() +
+  theme_classic()
+```
+
+
+Průměr je popsán v rovnici \@ref(eq:mean)
+
+\begin{equation}
+\bar{X} = \frac{\sum_{i=1}^n X_i}{n} (\#eq:mean)
+\end{equation}

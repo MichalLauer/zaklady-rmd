@@ -1,0 +1,137 @@
+---
+title: "Záklaní stavební kameny"
+author: "Michal Lauer"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+# Knihovny
+
+Načtení knihoven
+
+```{r }
+library(ggplot2)
+library(dplyr)
+```
+
+Základní data.
+
+```{r }
+data_raw <- ggplot2::diamonds
+data_raw
+```
+
+
+# Základní stavění
+
+Vrstva: 0
+
+```{r }
+ggplot()
+```
+
+Vrstva: data
+
+```{r }
+ggplot(data_raw)
+```
+
+Vrstva: aesthetics
+
+```{r }
+ggplot(data_raw, aes(x = carat, y = price, color = cut))
+```
+
+Vrstva: geometrie
+
+```{r }
+ggplot(data_raw, aes(x = carat, y = price, color = cut)) +
+  geom_point()
+```
+
+Vrstva: facety
+
+```{r }
+ggplot(data_raw, aes(x = carat, y = price, color = cut)) +
+  geom_point() +
+  facet_wrap(vars(color))
+```
+
+Vrstva: statistická transformace
+
+```{r }
+ggplot(data_raw, aes(x = carat, y = price, color = cut)) +
+  geom_point() +
+  facet_wrap(vars(color)) +
+  geom_smooth()
+```
+
+Vrstva: statistická transformace
+
+```{r }
+ggplot(data_raw, aes(x = carat, y = price, color = cut)) +
+  geom_point() +
+  facet_wrap(vars(color)) +
+  geom_smooth() +
+  coord_flip()
+```
+
+Vrstva: theme
+
+```{r }
+ggplot(data_raw, aes(x = carat, y = price, color = cut)) +
+  geom_point() +
+  facet_wrap(vars(color)) +
+  geom_smooth() +
+  coord_flip() +
+  theme_bw()
+```
+
+# Grafy
+
+```{r }
+ggplot(data_raw, aes(x = color, y = price)) +
+  geom_boxplot() +
+  scale_y_continuous(labels = scales::label_dollar()) +
+  theme_bw() +
+  theme(
+    panel.grid.major.x = element_blank()
+  ) +
+  labs(title = "Rozdělení ceny podle barvy",
+       subtitle = "Rozptyl nejspíše není konstantní",
+       x = "Typ barvy", y = NULL,
+       caption = "Michal Lauer | DataBon")
+```
+
+```{r }
+data_raw |> 
+  filter(x > 0) |> 
+  ggplot(aes(x = x, y = price)) +
+  geom_point() +
+  geom_smooth(se = F, method = "lm", formula = 'y ~ x') +
+  scale_y_log10() +
+  scale_x_log10() +
+  theme_classic() +
+  labs(title = "Logaritmovaný vztah je lineární",
+       subtitle = "Základ=10",
+       x = "log(délka)", y = "log(price)")
+```
+
+```{r }
+ggplot(data_raw, aes(x = color, fill = color)) +
+  geom_bar(show.legend = F) +
+  geom_label(aes(y = after_stat(count + 1000),
+                 label = scales::label_number()(
+                   after_stat(count))
+                 ),
+             fill = "white", stat = "count") +
+  scale_y_continuous(labels = scales::label_number()) +
+  scale_fill_manual(values = c("#04ffc9", "#05d6d2", "#05addb", "#0685e4",
+                               "#065ced", "#0733f6", "#070aff")) +
+  theme_minimal() +
+  theme(
+    panel.grid.major.x = element_blank(),
+    legend.position = "bottom"
+  ) +
+  labs(x = NULL, y = NULL)
+```

@@ -1,0 +1,164 @@
+---
+title: "Kvalita ovzduší"
+author: "Michal Lauer"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+![Zdroj: https://www.akcp.com/blog/air-quality-monitoring-for-humans-and-machines-health/](https://www.akcp.com/wp-content/uploads/2021/03/air-quality-1600x1000-1-1024x538.jpg)
+
+# Příprava
+
+Načtení knihoven.
+
+```{r warning=FALSE, message=FALSE}
+library(dplyr)   # Úprava dat
+library(tidyr)   # Čištění dat
+library(skimr)   # Přehled dat
+library(gt)      # Tabulky
+library(ggplot2) # Grafy
+library(glue)    # Spojování textu
+```
+
+Základní data.
+
+```{r }
+data_raw <- datasets::airquality
+```
+
+
+# Představení
+
+Dataset `airquality` je v Rku defaultně a obsahuje `r nrow(data_raw)` záznamů o kvalitě ovzduší v New Yorku.
+
+```{r }
+skim_without_charts(data_raw)
+```
+
+Interpretace promenných z <a href="https://www.rdocumentation.org/packages/datasets/versions/3.6.2/topics/airquality" target="_blank">datasetu</a> je následující:
+
+- **Ozone** - Průměrný ozon v částech na miliardu od 13:00 do 15:00 hodin na Rooseveltově ostrově.
+- **Solar.R** - Sluneční záření v Langleys ve frekvenčním pásmu 4 000 - 7 700 Angstromů od 8:00 do 12:00 hodin v Central Parku.
+- **Wind** - Průměrná rychlost větru v mílích za hodinu v 07:00 a v 10:00 hodin na letišti LaGuardia.
+- **Temp** - Maximální denní teplota ve stupních Fahrenheita na letišti La Guardia.
+- **Month** - Měsíc měření.
+- **Day** - Den měření.
+
+# Příprava dat
+
+Pro další datovou analýzu je data nejprve nutné zpracovat. Základním krokem
+je si vždy nastavit správné datové typy proměnných. Zde je potřeba pouze
+opravit měsíc měření.
+
+```{r }
+data_types <-
+  data_raw |> 
+  mutate(across(.cols = where(is.integer),
+                .fns = as.numeric),
+         Month = ordered(Month,
+                         level = 5:9,
+                         labels = c("Květen", "Červen", "Červenec",
+                                    "Srpen", "Zaří")))
+gt(head(data_types))
+```
+
+V datech jsou dále chybějící hodnoty, které doplníme průměrem podle 
+měsíce.
+
+```{r }
+data_full <-
+  data_types |> 
+  group_by(Month) |> 
+  mutate(across(
+    .cols = where(function(x) any(is.na(x))),
+    .fns = function(x) replace_na(x, mean(x, na.rm = T))
+  )) |> 
+  ungroup()
+
+data_full |> 
+  summarise(across(.cols = everything(),
+                   .fns = function(x) sum(is.na(x))))
+```
+
+```{r include=F}
+am <- "Červen"
+data_filtered <-
+  data_full |> 
+  filter(Month == am)
+av <- "Wind"
+```
+
+# Analýza měsíce: `r am`
+
+Vývoj hodnot v měsíci.
+
+```{r }
+minmax <-
+  data_filtered |>
+  filter(.data[[av]] %in% range(.data[[av]]))
+  
+data_filtered |> 
+  ggplot(aes(x = Day, y = .data[[av]])) +
+  geom_line() +
+  geom_point(data = minmax,
+             color = "red") +
+  theme_bw() +
+  labs(title = glue("Vývoj proměnné {av} v měsíci: {am}"),
+       x = "Den v měsíci")
+```
+
+Proměnná `r av` dosáhla maxima `r slice_max(minmax, Day)$Day`. den v
+měsíci (hodnota `r slice_max(minmax, Day)[[av]]`). Minimum nastalo 
+`r slice_min(minmax, Day)$Day`. den s hodnotou `r slice_min(minmax, Day)[[av]]`.
+
+```{r include=FALSE}
+ac1 <- "Ozone"
+ac2 <- "Temp"
+```
+
+# Korelační analýza: ``r ac1`` vs. ``r ac2``
+
+Korelace mezi ``r ac1`` a ``r ac2`` je znázorněná níže.
+
+```{r }
+correl12 <- cor.test(data_full[[ac1]], data_full[[ac2]])
+  
+data_full |> 
+  ggplot(aes(x = .data[[ac1]], y = .data[[ac2]])) +
+  geom_point() +
+  geom_smooth(method = "lm", se = F, formula = 'y ~ x') +
+  theme_bw() +
+  labs(title = "Korelační analýza",
+       subtitle = glue("Pearsonovo r={round(correl12$estimate, 2)}; ",
+                       "p-hodnota {format.pval(correl12$p.value)}"))
+```
+
+Z vyznačené p-hodnoty je vidět, že závislost je na 5% hladině významnosti
+`r if (correl12$p.value <= .05) "" else "ne"`významná.
+
+```{r include=FALSE}
+ay <- "Temp"
+ax <- "Wind"
+```
+
+
+# Regresní analýza: ``r ay`` podle ``r ax``
+
+```{r }
+fm12 <- as.formula(glue("{ay} ~ {ax}"))
+lm12 <- lm(fm12, data = data_full)
+
+data_full |> 
+  ggplot(aes(x = .data[[ax]], y = .data[[ay]])) +
+  geom_point() +
+  geom_smooth(method = "lm", se = F, formula = 'y ~ x') +
+  theme_bw() +
+  labs(title = "Korelační analýza",
+       subtitle = glue("Vztah popsán pomocí: {ay} = ",
+                       "{round(lm12$coefficients[1], 2)} + ",
+                       "{ax}*({round(lm12$coefficients[2], 2)})"))
+```
+
+Regresní vliv ``r ax`` na ``r ay`` je statisticky
+`r if (summary(lm12)$coefficients[ax, "Pr(>|t|)"] <= .05) "" else "ne"`významný
+(hladina významnosti 0,05).

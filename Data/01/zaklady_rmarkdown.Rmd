@@ -1,0 +1,39 @@
+---
+title: "Analýza aut"
+author: "Michal Lauer"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+# Úvodní nadpis
+
+Toto nadpis napsaný v **R Markdown**. Dokument byl vygenerován v
+`r format(Sys.Date(), "%A")`, konkrétně `r format(Sys.Date(), "%d. %m.")`
+v `r format(Sys.time(), "%H:%M")`.
+
+Jednoduše se můžeme podívat na graf z datového souboru `mtcars`.
+
+```{r graf}
+plot(mtcars$mpg, mtcars$wt)
+```
+
+```{r korelace, include=FALSE}
+correl <- cor.test(mtcars$mpg, mtcars$wt)
+```
+
+Z grafu lze vidět, že s rostoucí proměnnou `mpg` proměnná `wt` klesá. 
+Pearsonův korelační koeficient mezi veličinami je `r correl$estimate` 
+(p-hodnota `r format.pval(correl$p.value)`)
+
+Veličina `mpg` vypadá následovně:
+
+```{r popis-promenne, echo=FALSE}
+summary(mtcars$mpg)
+```
+
+Pokud bychom chtěli provést analýzu rozptylu, lze použít R funkce 
+`aov(...)`
+
+```{r anova, eval=FALSE}
+aov(mtcars$mpg ~ mtcars$cyl)
+```

@@ -1,0 +1,78 @@
+---
+title: "Úspěšnost písniček"
+author: "Michal Lauer"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+# Knihovny
+
+```{r warning=F, message=F}
+library(dplyr)
+library(tidyr)
+```
+
+# Příprava
+
+Teď nás čekají písničky a jejich úspěšnost.
+
+```{r }
+data_raw <- tidyr::billboard
+data_raw
+```
+
+# Výběr
+
+V analýze nás bude zajímat každý umělec a jeho prvních 12 týdnů.
+
+```{r }
+data_select <-
+  data_raw
+
+data_select
+```
+
+# Filter
+
+Dále nás zajímají pouze úspěšní skladatelé, kteří mají v prvním týdnu skóre
+alespoň 80.
+
+```{r }
+data_filter <-
+  data_select
+
+data_filter
+```
+
+# Agregace
+
+Jelikož může být umělců víc, chceme je agregovat a v každém týdny mít průměrné
+skóre ze všech jeho písniček (funkce `across(...)`).
+
+```{r }
+data_agg <-
+  data_filter
+
+data_agg
+```
+
+# Dlouhý formát
+
+S daty dále chceme pracovat tak, abychom měli označí týdne ve sloupečku
+*week* a hodnotu skóre ve sloupečků *score*.
+
+```{r }
+data_long <-
+  data_agg
+
+data_long
+```
+
+# Nejlepší autoři
+
+Finálně chceme zjistit, jaký autor byl v každém týdny nejvíce úspěšný
+(`slice_max(...)`).
+
+```{r }
+data_long
+
+```

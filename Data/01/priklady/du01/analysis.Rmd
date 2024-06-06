@@ -1,0 +1,231 @@
+---
+title: "Optimalizace"
+subtitle: "Úkol 1"
+author: "Michal Lauer"
+date: "`r format(Sys.time(), format = '%d. %m. %Y')`"
+output:
+  html_document:
+    theme: paper
+    css: "assets/css/style.css"
+    df_print: kable
+    # https://eranraviv.com/syntax-highlighting-style-in-rmarkdown/
+    highlight: zenburn
+    code_folding: show
+    toc: true
+    toc_float: true
+# https://inbo.github.io/tutorials/tutorials/r_citations_markdown/
+bibliography: "bib/references.bib"
+csl: "bib/iso690-author-date-cs.csl"
+editor_options: 
+  chunk_output_type: console
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile,
+                    encoding = encoding,
+                    output_dir = "output/")})
+---
+# Příprava
+
+Načtení balíčků
+
+```{r libs, warning=F, message=F}
+library(tibble)
+library(dplyr)
+```
+
+Data
+
+```{r label}
+x <- c(168, 179, 162, 169, 158, 168, 169, 169, 181, 160)
+```
+
+# Logaritmická věrohodnostní funkce
+
+Maximálně věrohodný odhad parametr $\theta$ lze získat pomocí věrohodnostní
+funkce [@malaVybraneKapitolyTeorie2016, s. 164] definovanou jako 
+
+$$
+L(\theta) = \prod_{i=1}^n f(x \space|\space \theta).
+$$
+V praxi se však používá logaritmický věrohodnostní funkce díky rychlejší
+optimalizaci a jednodušší derivaci součtu, tedy
+
+$$
+ln \space L(\theta) = \sum_{i=1}^n ln \space f(x \space|\space \theta)
+$$
+
+## Aplikace na normální rozdělení
+
+[@malaVybraneKapitolyTeorie2016, s. 11] definuje hustotu normální rozdělení jako
+
+$$
+f(x) = \frac{1}{\sigma\sqrt{2\pi}} e^{-\frac{(x - \mu)^2}{2\sigma^2}}.
+$$
+
+Po dosazení do logaritmické věrohodnostní funkce vzniká logaritmická
+věrohodnostní funkce normálního rozdělení:
+
+$$
+\begin{align}
+L(\mu, \sigma^2 \space|\space X) &= \prod_{i=1}^n f(x \space|\space \theta) \\
+&= \prod_{i=1}^n \frac{1}{\sigma\sqrt{2\pi}} e^{-\frac{(x_i - \mu)^2}{2\sigma^2}} \\
+&= \prod_{i=1}^n \left(2\pi\sigma^2\right)^{-1/2} e^{-\frac{(x_i - \mu)^2}{2\sigma^2}} \\
+&= \left(2\pi\sigma^2\right)^{-n/2} e^{-\frac{1}{2\sigma^2} \sum\limits_{i=1}^n (x_i - \mu)^2}
+\end{align}
+$$
+
+Věrohodnostní funkci je dále nutné logaritmovat.
+
+$$
+\begin{align}
+ln \space L(\mu, \sigma^2) &= ln \left(\left(2\pi\sigma^2\right)^{-n/2} e^{-\frac{1}{2\sigma^2} \sum\limits_{i=1}^n (x_i - \mu)^2}\right) \\
+&= -\frac{n}{2}ln\left(2\pi\sigma^2\right) {-\frac{1}{2\sigma^2} \sum\limits_{i=1}^n (x_i - \mu)^2} \\
+&= -\frac{n}{2}ln\left(2\pi\right) -\frac{n}{2}ln\left(\sigma^2\right) -\frac{1}{2\sigma^2} \sum\limits_{i=1}^n (x_i - \mu)^2
+\end{align}
+$$
+
+Pro získání explicitního tvaru pro dané parametry je nutné rovnici podle
+parametrů derivovat.
+
+## Parametr polohy
+
+Pro získání parametru polohy se musí logaritmická věrohodnostní funkce
+derivovat podle parametru $\mu$.
+
+$$
+\begin{align}
+\frac{\partial}{\partial \mu} ln \space L(\mu, \sigma^2) &= \frac{1}{\sigma^2} \sum_{i=1}^n
+(x_i - \mu)
+\end{align}
+$$
+
+Výsledný výraz je nutné položit nule a vyjádřit $\mu$.
+
+$$
+\begin{align}
+\frac{1}{\sigma^2} \sum_{i=1}^n (x_i - \mu) &= 0 \\
+\sum_{i=1}^n x_i - n\mu = 0 \\
+\mu = \frac{1}{n} \sum_{i=1}^n x_i
+\end{align}
+$$
+
+Odhad lokace $\mu$ je tedy roven
+
+$$
+\hat{\mu} = \frac{1}{n} \sum_{i=1}^n x_i
+$$
+
+## Rozptyl
+
+Rozptyl lze vyjádřit pomocí stejného postupu. Prve se tedy derivuje
+logaritmická věrohodnostní funkce podle $\sigma^2$.
+
+$$
+\begin{align}
+\frac{\partial}{\partial \sigma^2} ln \space L(\mu, \sigma^2)
+&= -\frac{n}{2\sigma^2} -\frac{1}{2} \sum\limits_{i=1}^n (x_i - \mu)^2
+\frac{\partial}{\partial \sigma^2} \left(\frac{1}{\sigma^2}\right) \\
+&= -\frac{n}{2\sigma^2} +\frac{1}{2\sigma^4} \sum\limits_{i=1}^n (x_i - \mu)^2 \\
+&= \frac{1}{2\sigma^2}\left( \frac{\sum\limits_{i=1}^n (x_i - \mu)^2}{\sigma^2}  - n \right)
+\end{align}
+$$
+
+Výraz je nyní nutné položit nule a vyjádřit $\sigma^2$.
+
+$$
+\begin{align}
+\frac{1}{2\sigma^2}\left( \frac{\sum\limits_{i=1}^n (x_i - \mu)^2}{\sigma^2}  - n \right) &= 0 \\
+\frac{\sum\limits_{i=1}^n (x_i - \mu)^2}{\sigma^2} &= n \\
+\frac{\sum\limits_{i=1}^n (x_i - \mu)^2}{n} &= \sigma^2
+\end{align}
+$$
+
+Pro nenulový rozptyl je jeho maximálně věrohodný odhad roven výrazu
+
+$$
+\hat{\sigma}^2 = \frac{1}{n} \sum\limits_{i=1}^n (x_i - \hat{\mu})^2.
+$$
+
+# Analytické odvození
+
+## Střední hodnota
+
+```{r }
+mean_analytical <- sum(x) / length(x)
+```
+
+Odhad Střední hodnota pomocí analytického odvození je rovna
+`r round(mean_analytical, 2)`
+
+## Rozptyl
+
+```{r }
+var_analytical <- sum((x - mean_analytical)^2) / length(x)
+```
+
+Odhad rozptylu pomocí analytického odvození je rovna
+`r round(var_analytical, 2)`
+
+# Optimalizace
+
+Parametry $\mu$ a $\sigma^2$ lze také najít pomocí minimalizace logaritmické
+věrohodnostní funkce.
+
+```{r }
+normal_max_ll <- function(params, x) {
+  mu     <- params[1]
+  sigma2 <- params[2]
+  
+  n <- length(x)
+  
+  logl <- -(n/2)*log(2*pi) - (n/2)*log(sigma2) - sum((x - mu)^2)/(2*sigma2)
+  
+  return(-logl)
+}
+```
+
+Funkce se nyní maximalizuje.
+
+```{r }
+optim_all <- 
+  optim(par = c(0, 1), 
+        x = x,
+        fn = normal_max_ll)
+
+mean_optim1 <- optim_all$par[1]
+var_optim1  <- optim_all$par[2]
+```
+
+Odhadnutý populační průměr je `r round(mean_optim1, 2)` s rozptylem
+`r round(var_optim1, 2)`.
+
+Jelikož se zkouší všechny možné kombinace, funkce občas vrátí error kvůli 
+výrazu `log(sigma2)`. Z dat i matematiky dává smysl usoudit, že průměr $\mu$ i rozptyl $\sigma^2$ budou větší než 0. Algoritmus s dolní hranicí chybu již nehází.
+
+```{r }
+optim_low <- 
+  optim(par = c(0,1),
+        x = x,
+        fn = normal_max_ll,
+        lower = c(0,0),
+        method = "L-BFGS-B") 
+
+mean_optim2 <- optim_low$par[1]
+var_optim2  <- optim_low$par[2]
+```
+
+Odhadnutý populační průměr je `r round(mean_optim2, 2)` s rozptylem
+`r round(var_optim2, 2)`.
+
+# Porovnání výsledků
+
+```{r }
+tribble(
+  ~type,                    ~mean,           ~var,
+  "Analytické vyjádření",   mean_analytical, var_analytical,
+  "Optimalizace",           mean_optim1,     var_optim1,
+  "Optimalizace s limitem", mean_optim2,     var_optim2) |>
+  mutate(mean = num(mean, digits = 3),
+         var  = num(var, digits = 3))
+```
+
+# References

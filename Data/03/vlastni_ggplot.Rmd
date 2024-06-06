@@ -1,0 +1,85 @@
+---
+title: "Domy v TX"
+author: "Michal Lauer"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+# Knihovny
+
+Načtení knihoven.
+
+```{r warning=F, message=F}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+```
+
+Příprava dat.
+
+```{r }
+data_raw <- ggplot2::txhousing
+head(data_raw)
+```
+
+# Příprava dat
+
+Nejprve všechny chybějící hodnoty nahradíme průměrem za daný rok a město.
+
+```{r }
+data_filtered <-
+  data_raw |>
+  group_by(city, year) |> 
+  mutate(across(.cols = where(function(x) any(is.na(x))),
+                .fns = function(x) replace_na(x, mean(x, na.rm = T))))
+
+data_filtered
+```
+
+V této analýze se podíváme na data z města *El Paso*, které leží v Texasu.
+
+```{r }
+data_city <-
+  data_filtered |>
+  filter(city == "El Paso")
+
+head(data_city)
+```
+
+Nebudou nás zajímat všechny roky, ale porovnání v čase a to v letech 2000 a
+2010.
+
+```{r }
+data_time <-
+  data_city |> 
+  filter(year %in% c(2000, 2010))
+
+head(data_time)
+```
+
+# Grafy
+
+Graf, který v jednom okénku (*nebudeme používat facet*) porovná sales v každém
+měsíci v letech 2000 a 2010.
+ 
+- osa X: měsíce,
+- osa y: počet prodejů,
+- barva: podle roku,
+- možná geometrie: dva sloupečky vedle sebe,
+- vhodný theme, osy, názvy...
+
+```{r }
+ggplot(data_time)
+```
+
+Porovnání `listings` v čase, ve **všech** letech (tedy jedna z už vypočtených
+tabulek).
+ 
+- osa X: měsíce,
+- osa y: počet domů,
+- možná geometrie: čára + body,
+- vhodný theme, osy, názvy...
+
+```{r }
+ggplot(data_city)
+```

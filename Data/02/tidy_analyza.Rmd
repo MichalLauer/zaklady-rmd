@@ -1,0 +1,77 @@
+---
+title: "Používání telefonu"
+author: "Michal Lauer"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+# Příprava
+
+V této analýze se podíváme na počet telefonů ve světě.
+
+```{r }
+data_raw <- datasets::WorldPhones
+data_raw
+```
+
+# Wide formát
+
+Ze základního R formátu to převedeme do tabulky, se kterou se lépe pracuje.
+
+```{r }
+data_wide <-
+  data_raw |>
+  dplyr::as_tibble(rownames = NA) |> 
+  tibble::rownames_to_column(var = "year")
+
+data_wide
+```
+
+# Výběr
+
+Budeme chtít pracovat jenom s Amerikou.
+
+```{r }
+data_sel <-
+  data_wide |> 
+  dplyr::select(year, dplyr::ends_with("Amer"))
+
+data_sel
+```
+
+# Pivotování
+
+Data v tomhle formátu jsou *wide*, ale my je chceme mít *long*.
+
+```{r }
+data_long <-
+  data_sel |>
+  tidyr::pivot_longer(cols = -year,
+                      names_to = "country",
+                      names_transform = factor,
+                      values_to =  "usage")
+
+data_long
+```
+
+# Filtrování
+
+Nakonec jsme se rozhodli, že budeme porovnávat jenom jižní a severní ameriku.
+
+```{r }
+data_filter <-
+  data_long |> 
+  dplyr::filter(country %in% c("N.Amer", "S.Amer"))
+
+data_filter
+```
+
+# Agregace
+
+Jaký je průměrný usage v letech?
+
+```{r }
+data_filter |> 
+  dplyr::group_by(country) |> 
+  dplyr::summarise(mean_usage = mean(usage))
+```

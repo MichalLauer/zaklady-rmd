@@ -1,0 +1,42 @@
+---
+title: "Habits"
+author: Michal Lauer
+date: March 15, 2024
+output: ioslides_presentation
+---
+```{r include=F}
+library(ggplot2)
+library(plotly)
+library(gt)
+```
+
+# Úvod
+
+## Co všechno už umíme
+
+- Markdown
+- R Markdown
+- Statické a dynamické grafy
+
+## `{ggplot2}`
+
+```{r }
+ggplot(mtcars, aes(x = mpg, y = drat)) +
+  geom_point() +
+  theme_bw()
+```
+
+## `{plotly}`
+
+```{r }
+plot_ly(data = mtcars, mode = "markers", type = "scatter") |>
+  add_trace(x = ~ mpg, y = ~drat)
+```
+
+## `{gt}`
+
+```{r }
+mtcars |>
+  head() |>
+  gt()
+```

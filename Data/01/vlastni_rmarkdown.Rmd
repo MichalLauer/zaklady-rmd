@@ -1,0 +1,48 @@
+---
+title: "Kvalita ovzduší"
+author: "Michal Lauer"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+<!-- Obrázek -->
+
+# Knihovny
+
+Načtení knihoven.
+
+<!-- ... -->
+
+Příprava surových dat, převzato z [kaggle.com](https://www.kaggle.com/datasets/mustafa20635/fitness-exercises-using-bfp-and-bmi).
+
+```{r }
+data_raw <-
+  readr::read_csv("bmi.csv",
+                  show_col_types = F)
+```
+
+# Představení
+
+<!-- Popis dat, tabulka, deskriptivní statistiky... -->
+
+## Chybějící hodnoty
+
+<!-- Kontrola + nahrazení, jak nechám na vás -->
+
+```{r }
+ag <- "" # Kategorie Male, Female
+av <- "" # Proměnné Weight, Height...
+```
+
+# Rozdělení proměnné `Weight` pro `Muže`
+
+<!-- Histogram a průměr pro danou kategorii/pohlaví -->
+
+```{r }
+ag <- "" # BMIcase, Gender...
+av <- "" # Weight, BMI...
+```
+
+# Boxplot `Weight` podle `BMIcase`
+
+<!-- Boxplot proměnné podle skupiny -->
