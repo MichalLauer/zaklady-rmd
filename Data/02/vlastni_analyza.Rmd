@@ -45,7 +45,7 @@ data_filter
 
 # Agregace
 
-Jelikož může být umělců víc, chceme je agregovat a v každém týdny mít průměrné
+Jelikož může být umělců víc, chceme je agregovat a v každém týdnu mít průměrné
 skóre ze všech jeho písniček (funkce `across(...)`).
 
 ```{r }

@@ -35,7 +35,9 @@ Dataset `airquality` je v Rku defaultně a obsahuje `r nrow(data_raw)` záznamů
 skim_without_charts(data_raw)
 ```
 
-Interpretace promenných z <a href="https://www.rdocumentation.org/packages/datasets/versions/3.6.2/topics/airquality" target="_blank">datasetu</a> je následující:
+Interpretace promenných z
+<a href="https://www.rdocumentation.org/packages/datasets/versions/3.6.2/topics/airquality" target="_blank">datasetu</a>
+je následující:
 
 - **Ozone** - Průměrný ozon v částech na miliardu od 13:00 do 15:00 hodin na Rooseveltově ostrově.
 - **Solar.R** - Sluneční záření v Langleys ve frekvenčním pásmu 4 000 - 7 700 Angstromů od 8:00 do 12:00 hodin v Central Parku.
@@ -66,22 +68,21 @@ V datech jsou dále chybějící hodnoty, které doplníme průměrem podle
 měsíce.
 
 ```{r }
-data_full <-
-  data_types |> 
-  group_by(Month) |> 
+dat_full <-
+  data_typs |> 
+  group_b(Month) |> 
   mutate(across(
-    .cols = where(function(x) any(is.na(x))),
+    .cols = whee(function(x) any(is.na(x))),
     .fns = function(x) replace_na(x, mean(x, na.rm = T))
   )) |> 
   ungroup()
-
 data_full |> 
-  summarise(across(.cols = everything(),
-                   .fns = function(x) sum(is.na(x))))
+  summarse(across(.cols= everything(),
+                  .fns = function(x) sum(is.n(x))))
 ```
 
 ```{r include=F}
-am <- "Červen"
+am <- "Květen"
 data_filtered <-
   data_full |> 
   filter(Month == am)
@@ -96,7 +97,7 @@ Vývoj hodnot v měsíci.
 minmax <-
   data_filtered |>
   filter(.data[[av]] %in% range(.data[[av]]))
-  
+
 data_filtered |> 
   ggplot(aes(x = Day, y = .data[[av]])) +
   geom_line() +
@@ -107,12 +108,14 @@ data_filtered |>
        x = "Den v měsíci")
 ```
 
-Proměnná `r av` dosáhla maxima `r slice_max(minmax, Day)$Day`. den v
-měsíci (hodnota `r slice_max(minmax, Day)[[av]]`). Minimum nastalo 
-`r slice_min(minmax, Day)$Day`. den s hodnotou `r slice_min(minmax, Day)[[av]]`.
+Proměnná `r av` dosáhla maxima `r slice_max(minmax, order_by = .data[[av]])$Day`.
+den v měsíci (hodnota `r slice_max(minmax, order_by = .data[[av]])[[av]]`).
+Minimum nastalo `r slice_min(minmax, .data[[av]])$Day`. den s hodnotou
+`r slice_min(minmax, .data[[av]])[[av]]`.
+
 
 ```{r include=FALSE}
-ac1 <- "Ozone"
+ac1 <- "Solar.R"
 ac2 <- "Temp"
 ```
 
@@ -122,7 +125,7 @@ Korelace mezi ``r ac1`` a ``r ac2`` je znázorněná níže.
 
 ```{r }
 correl12 <- cor.test(data_full[[ac1]], data_full[[ac2]])
-  
+
 data_full |> 
   ggplot(aes(x = .data[[ac1]], y = .data[[ac2]])) +
   geom_point() +
@@ -137,7 +140,7 @@ Z vyznačené p-hodnoty je vidět, že závislost je na 5% hladině významnosti
 `r if (correl12$p.value <= .05) "" else "ne"`významná.
 
 ```{r include=FALSE}
-ay <- "Temp"
+ay <- "Solar.R"
 ax <- "Wind"
 ```
 

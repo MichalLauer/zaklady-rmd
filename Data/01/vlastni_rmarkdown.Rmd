@@ -1,17 +1,21 @@
 ---
-title: "Kvalita ovzduší"
-author: "Michal Lauer"
+title: "CO TO MŮŽE BÝT???"
+author: "TO BUDETE VY"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: html_document
 ---
 
-<!-- Obrázek -->
+![zdroj: https://fitshaker.cz/legendarni-cislo-bmi-je-skutecne-tak-dulezite-jak-si-myslime](https://d2c9wzes5ckfvo.cloudfront.net/blog/bmi%20obrazok%201080%20x%201080%20px%20CZ-884133-large.jpg "Obrázek popisující BMI")
 
 # Knihovny
 
 Načtení knihoven.
 
-<!-- ... -->
+```{r library=FALSE, message=FALSE}
+library(dplyr)
+library(skimr)
+library(ggplot2)
+```
 
 Příprava surových dat, převzato z [kaggle.com](https://www.kaggle.com/datasets/mustafa20635/fitness-exercises-using-bfp-and-bmi).
 
@@ -22,8 +26,6 @@ data_raw <-
 ```
 
 # Představení
-
-<!-- Popis dat, tabulka, deskriptivní statistiky... -->
 
 ## Chybějící hodnoty
 
