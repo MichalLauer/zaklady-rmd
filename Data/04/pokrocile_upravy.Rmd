@@ -5,12 +5,29 @@ author:
   - John Doe^[Institution One, john@example.org]
   - Jane Doe^[Institution Two, jane@example.org]
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-output: html_document
+output:
+  bookdown::html_document2:
+    lof: yes
+bibliography: citace.bib
+cls: iso690.cls
+lof: yes
+knit: (function(inputFile, encoding) {
+          rmarkdown::render(inputFile,
+                            encoding = encoding,
+                            output_dir = "output/")})
 params:
-  col: "disp"
+  region: 
 ---
 
-# Analýza proměnné `r params$col`
+Hodnota parametru: `r params$region`
+
+
+Viz. \@ref(eq:def)
+
+$$
+x = 3 (\#eq:def)
+$$
+
 
 # Knihovny
 
@@ -21,6 +38,14 @@ library(gt)
 ```
 
 # Načtení dat {#data-load}
+
+Bez závorek: @HebakEtAl2015_StatistickeMysleniNastroje
+
+Se závorkami: [@HebakEtAl2015_StatistickeMysleniNastroje]
+
+Upřesnění: [@HebakEtAl2015_StatistickeMysleniNastroje, s. 80]
+
+Víc citací: [@HebakEtAl2015_StatistickeMysleniNastroje; @MocEtAl2013_MatematikaProEkonomy,]
 
 Načtení dat o autech, jsme v [této](#data-load) kapitole.
 
@@ -40,14 +65,51 @@ Tabulka \@ref(tab:mtc)
 Jednoduchý graf, viz \@ref(fig:muj-grafik).
 
 ```{r muj-grafik, fig.cap="Popis obrázku"}
-ggplot(mtcars, aes(x = factor(cyl), y = mpg)) +
+g1 <-
+  ggplot(mtcars, aes(x = factor(cyl), y = mpg)) +
   geom_boxplot() +
   theme_classic()
-```
 
+plotly::ggplotly(g1)
+```
 
 Průměr je popsán v rovnici \@ref(eq:mean)
 
+```{=tex}
 \begin{equation}
 \bar{X} = \frac{\sum_{i=1}^n X_i}{n} (\#eq:mean)
 \end{equation}
+```
+
+# a
+
+## b
+
+### c
+
+## d
+
+## Reference
+
+```{r }
+
+```
+
+
+
+
+```{r }
+# Create a gt table using the `exibble` dataset
+exibble |>
+  select(-c(fctr, date, time, datetime)) |>
+  gt(rowname_col = "row", groupname_col = "group") |>
+  sub_missing() |>
+  summary_rows(
+    groups = everything(),
+    columns = num,
+    fns = list(
+      avg = ~ mean(.x, na.rm = TRUE)
+    )
+  )
+  
+```

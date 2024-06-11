@@ -1,0 +1,57 @@
+---
+title: "Habits"
+author: John Doe
+date: March 22, 2005
+output: revealjs::revealjs_presentation
+---
+
+# In the morning
+
+## Getting up | What I like to do first thing
+
+<div class="columns-2">
+  - Turn off alarm
+  - Get out of bed
+
+  - Bullet 1
+  - Bullet 2
+  - Bullet 3
+</div>
+
+<div class="notes">
+This is my *note*.
+
+- It can contain markdown
+- like this list
+</div>
+
+## Breakfast {.smaller}
+
+- Eat eggs
+- Drink coffee
+
+```{r }
+x <- rnorm(100)
+### <b>
+x <- x+1
+### </b>
+mean(x)
+```
+
+# In the evening
+
+## Dinner
+
+- Eat spaghetti
+- Drink wine
+
+---
+
+```{r, cars, fig.cap="A scatterplot.", echo=FALSE}
+plot(cars)
+```
+
+## Going to sleep
+
+- Get in bed
+- Count sheep
